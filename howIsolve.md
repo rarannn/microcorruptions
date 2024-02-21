@@ -46,7 +46,7 @@ Nah, setelah di input nanti password tersimpan di memory address di mulai dari `
 0x44ae:  0f4e           mov     r14, r15
 0x44b0:  3041           ret
 ```
-Pasti kamu sudah bisa menemukan apa yang menarik dalam fungsi ini... Yaaa! `cmp`, karena bisa diliat di func `<check_password>` address 0x448a, meng-<i>compare</i> address lokasi register r15 dengan off-set. Yang pertama pada 0x448a value `#0x3264` di-<i>compare</i> dengan value yang terletak di register `r15: 0x439c` yang memiliki value "p" atau hex 0x70.<br>
+Pasti kamu udah bisa menemukan apa yang menarik dalam fungsi ini... Yaaa! `cmp`, karena bisa diliat di func `<check_password>` address 0x448a, meng-<i>compare</i> address lokasi register r15 dengan off-set. Yang pertama pada 0x448a value `#0x3264` di-<i>compare</i> dengan value yang terletak di register `r15: 0x439c` yang memiliki value "p" atau hex 0x70.<br>
 <img src="Sydney3.png" alt="-" style="display: block; margin: auto;scale: 95%"><br>
 Kita langsung aja copy hex yang di <i>compare</i> dengan register r15 dari assembly itu, dengan [little-endianness](https://en.wikipedia.org/wiki/Endianness).<br>
 ```
@@ -118,11 +118,11 @@ Ini adalah function login, dan juga `<main>` isinya cuma manggil func `<login>` 
 0x447a:  3041           ret
 ```
 
-Di dalam `0x4526:  0524           jz    $+0xc <login+0x32>`, mengetes register `r15` jika 0, maka akan lompat ke function register 0xc (jz = Jump if Zero). Tapi masalahnya register `r15` akan selalu memiliki value `0` karena pada `0x4470:  5f44 fcff      mov.b   -0x4(r4), r15` di dalam register `r4` offset `0x4`, value tersebut adalah 0. Jadi ketika saya reset debugger dan mulai dengan input 100 "A", dan berberapa menit mencoba debugging lagi. Ternyata buffer-overflow!
+Di dalam `0x4526:  0524           jz    $+0xc <login+0x32>`, mengetes register `r15` jika 0, maka akan lompat ke function register 0xc (jz = Jump if Zero). Tapi masalahnya register `r15` akan selalu memiliki value `0` karena pada `0x4470:  5f44 fcff      mov.b   -0x4(r4), r15`, di dalam register `r4` offset `0x4`, value tersebut selalu 0x0. Jadi gue reset debugger dan mulai dengan input 100 "A", dan berberapa menit mencoba debugging lagi. Ternyata buffer-overflow! pertanda yang bagus.
 <img src="Cusco1.png" alt="-" style="display: block; margin: auto;scale: 95%">
 Bisa diliat kalo ada 3 function yang ter-overwrite dengan 41 atau "A". Ketika stack-smashing, pointer menunjuk pada value `4141`. Biar tau di address apa pointer berhenti, gue reset debugger dan kirim password lagi dengan `AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMNNNNOOOOPPPPQQQQRRRRSSSSTTTTUUUUVVVVWWWWXXXXYYYYZZZZ0000111122223333444455556666777788889999` (sebut aja padding).
 <img src="Cusco2.png" alt="-" style="display: block; margin: auto;scale: 95%">
-Dengan itu bisa keliatan kalo program pointer berhenti di address `0x4545` (Atau "EE" karena ter-overwrite). Jadi tinggal ambil padding sampai "F" dan diubah jadi hex, dan ditambah memory address function `<unlock_door>`.<br>
+Dengan itu bisa keliatan kalo program pointer berhenti di address `0x4545` (Atau "EE" karena ter-overwrite). Jadi tinggal ambil padding sampai "F" dan diubah jadi hex, dan ditambah (bukan seperti 1+1 = 2 yak) memory address function `<unlock_door>`.<br>
 `41414141424242424343434344444444` + `4644` (Bukan `4446` karena diketik dengan little-endiannes)
 
 #WORK IN PROGRESS
