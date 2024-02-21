@@ -28,7 +28,7 @@ Password nya bisa dilihat di func create_password: `5o)Dsnd`
 0x4472:  3150 6400      add     #0x64, sp
 ```
 
-Ketika program di-mulai, program akan memanggil `<get_password>` untuk menerima input dari user, contoh kita masukkan "password"<br><br>
+Ketika program di-mulai, program akan memanggil `<get_password>` untuk menerima input dari user, contoh kita masukkan "password"<br>
 <img src="Sydney1.png" alt="Input Password" style="display: block; margin: auto;"><br>
 Nah, setelah di input nanti password tersimpan di memory address di mulai dari `0x439c - 43a3`, lalu `<check_password>` dipanggil oleh main, di address `0x444c`.<br>
 ```as
@@ -59,7 +59,7 @@ Lalu tinggal digabung aja semua jadi: 0x64324e5f527a752a yang diubah ke ASCII me
 
 ## Hanoi
 Saya biasanya mulai dengan me-ngetes input dengan value "password", jadi langsung aja.
-<img src="Hanoi1.png" alt="-" style="display: block; margin: auto;scale: 95%">
+<br><img src="Hanoi1.png" alt="-" style="display: block; margin: auto;scale: 95%"><br>
 
 ```as
 0x4520 <login>
@@ -118,8 +118,8 @@ Ini adalah function login, dan juga `<main>` isinya cuma manggil func `<login>` 
 0x447a:  3041           ret
 ```
 
-Di dalam `0x4526:  0524           jz    $+0xc <login+0x32>`, mengetes register `r15` jika 0, maka akan lompat ke function register 0xc (jz = Jump if Zero). Tapi masalahnya register `r15` akan selalu memiliki value `0` karena pada `0x4470:  5f44 fcff      mov.b   -0x4(r4), r15`, di dalam register `r4` offset `0x4`, value tersebut selalu 0x0. Jadi gue reset debugger dan mulai dengan input 100 "A", dan berberapa menit mencoba debugging lagi. Ternyata buffer-overflow! pertanda yang bagus.
-<img src="Cusco1.png" alt="-" style="display: block; margin: auto;scale: 95%">
+Di dalam `0x4526:  0524           jz    $+0xc <login+0x32>`, mengetes register `r15` jika 0, maka akan lompat ke function register 0xc (jz = Jump if Zero). Tapi masalahnya register `r15` akan selalu memiliki value `0` karena pada `0x4470:  5f44 fcff      mov.b   -0x4(r4), r15`, di dalam register `r4` offset `0x4`, value tersebut selalu 0x0. Jadi gue reset debugger dan mulai dengan input 100 "A", dan berberapa menit mencoba debugging lagi. Ternyata buffer-overflow! pertanda yang bagus.<br>
+<img src="Cusco1.png" alt="-" style="display: block; margin: auto;scale: 95%"><br>
 Bisa diliat kalo ada 3 function yang ter-overwrite dengan 41 atau "A". Ketika stack-smashing, pointer menunjuk pada value `4141`. Biar tau di address apa pointer berhenti, gue reset debugger dan kirim password lagi dengan `AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMNNNNOOOOPPPPQQQQRRRRSSSSTTTTUUUUVVVVWWWWXXXXYYYYZZZZ0000111122223333444455556666777788889999` (sebut aja padding).
 <img src="Cusco2.png" alt="-" style="display: block; margin: auto;scale: 95%">
 Dengan itu bisa keliatan kalo program pointer berhenti di address `0x4545` (Atau "EE" karena ter-overwrite). Jadi tinggal ambil padding sampai "F" dan diubah jadi hex, dan ditambah (bukan seperti 1+1 = 2 yak) memory address function `<unlock_door>`.<br>
